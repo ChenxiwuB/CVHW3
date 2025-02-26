@@ -18,29 +18,70 @@ def estimate_transform(start_points, end_points):
     # We can rewrite this as M * starting_points - end_points = 0
     
     # TODO Step 1: Transform the point coordinates to the A matrix and b vector
-    A = np.array(
-        [
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 0, 0, 0],
-        ]
-    )
-    b = np.array([[0], [0], [0], [0], [0], [0], [0], [0]])
+    # A = np.array(
+    #     [
+    #         [0, 0, 0, 0],
+    #         [0, 0, 0, 0],
+    #         [0, 0, 0, 0],
+    #         [0, 0, 0, 0],
+    #         [0, 0, 0, 0],
+    #         [0, 0, 0, 0],
+    #         [0, 0, 0, 0],
+    #         [0, 0, 0, 0],
+    #     ]
+    # )
+    # b = np.array([[0], [0], [0], [0], [0], [0], [0], [0]])
 
-    ## TODO Step 2: Solve for the least squares solution using np.linalg.lstsq()
+    # for i in range(4):
+    #     x = start_points[0, i]
+    #     y = start_points[1, i]
+    #     xprime = end_points[0, i]
+    #     yprime = end_points[1, i]
+        
+    #     A[2*i, :]   = [x, y, 0, 0]
+    #     b[2*i, 0]   = xprime
+        
+    #     A[2*i+1, :] = [0, 0, x, y]
+    #     b[2*i+1, 0] = yprime
+        
+    # ## TODO Step 2: Solve for the least squares solution using np.linalg.lstsq()
+    # x_vec, residual, rank, s = np.linalg.lstsq(A, b, rcond=None)
     
-    ## TODO Step 3: Reshape the x vector into a matrix the same size as M
+    # ## TODO Step 3: Reshape the x vector into a matrix the same size as M
+    # x = x_vec.reshape((2, 2))
+    
+    
+    # Create the A matrix (2N x 6) and b vector (2N x 1)
+    A = np.zeros((2 * 4, 6))
+    b = np.zeros((2 * 4, 1))
+    
+    for i in range(4):
+        x = start_points[0, i]
+        y = start_points[1, i]
+        xprime = end_points[0, i]
+        yprime = end_points[1, i]
+        
+        # Equation for x':  x * m11 + y * m12 + 1 * t1 = xprime
+        A[2 * i, :] = [x, y, 1, 0, 0, 0]
+        b[2 * i, 0] = xprime
+        
+        # Equation for y':  x * m21 + y * m22 + 1 * t2 = yprime
+        A[2 * i + 1, :] = [0, 0, 0, x, y, 1]
+        b[2 * i + 1, 0] = yprime
+    
+    # Solve for x in the least squares sense (should be exact for an affine transformation)
+    x_vec, residual, rank, s = np.linalg.lstsq(A, b, rcond=None)
+    
+    # Reshape the solution vector into a 2x3 affine transformation matrix
+    x = x_vec.reshape((2, 3))
     
     return x, residual
 
 
 def transform(starting_points, transformation_matrix):
-    return transformation_matrix @ starting_points
+    N = starting_points.shape[1]
+    homo_points = np.vstack((starting_points, np.ones((1, N))))
+    return transformation_matrix @ homo_points
 
 
 def main():
