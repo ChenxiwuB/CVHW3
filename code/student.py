@@ -186,7 +186,7 @@ def ransac_fundamental_matrix(matches1, matches2, num_iters):
     best_inlier_residual = np.inf
 
     #******Set a threshold*******
-    threshold = 0.0008
+    threshold = 0.005
 
     N = matches1.shape[0]
     for i in range(num_iters):
@@ -248,11 +248,7 @@ def matches_to_3d(points2d_1, points2d_2, M1, M2, threshold=1.0):
     :return points2d_1_inlier: [M x 2] points as subset of inlier points from points2d_1
     :return points2d_2_inlier: [M x 2] points as subset of inlier points from points2d_2
     """
-    
-    points2d_1 = np.asarray(points2d_1, dtype=float)
-    points2d_2 = np.asarray(points2d_2, dtype=float)
-    M1 = np.asarray(M1, dtype=float)
-    M2 = np.asarray(M2, dtype=float)
+    threshold=2.0
 
     points3d_list = []
     inlier_idx = []
@@ -284,7 +280,6 @@ def matches_to_3d(points2d_1, points2d_2, M1, M2, threshold=1.0):
         proj_1 = M1 @ homog_3d 
         px1 = proj_1[0] / proj_1[2]
         py1 = proj_1[1] / proj_1[2]
-        # Reprojection error in image 1
         err1 = np.sqrt((px1 - u1)**2 + (py1 - v1)**2)
 
         proj_2 = M2 @ homog_3d
