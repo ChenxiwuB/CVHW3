@@ -202,7 +202,8 @@ def ransac_fundamental_matrix(matches1, matches2, num_iters):
         sample_indices = np.random.choice(N, 8, replace=False)
         subset1 = matches1[sample_indices, :]
         subset2 = matches2[sample_indices, :]
-        F, _ = estimate_fundamental_matrix(subset1, subset2)
+        #F, _ = estimate_fundamental_matrix(subset1, subset2)
+        F, _ = cv2.findFundamentalMat(subset1, subset2, cv2.FM_8POINT, 1e10, 0, 1)
         if F is None or F.shape != (3, 3):
             continue
 
