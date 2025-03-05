@@ -147,13 +147,28 @@ def estimate_fundamental_matrix(points1, points2):
     :return F_matrix, the [3 x 3] fundamental matrix
             residual, the sum of the squared error in the estimation
     """
-    ########################
-    # TODO: Your code here #
-    ########################
 
-    # Arbitrary intentionally incorrect Fundamental matrix placeholder
-    F_matrix = np.array([[0, 0, -.0004], [0, 0, .0032], [0, -0.0044, .1034]])
-    residual = 5 # Arbitrary stencil code initial value placeholder
+    n = points1.shape[0]
+    A = np.zeros((n, 9), dtype=float)
+    for i in range(n):
+        u,  v  = points1[i, 0], points1[i, 1]
+        up, vp = points2[i, 0], points2[i, 1]
+        A[i, :] = [up*u, up*v, up, vp*u, vp*v, vp, u, v, 1]
+    U, S, Vt = np.linalg.svd(A)
+    f = Vt[-1, :]
+
+    F_matrix = f.reshape((3, 3))
+
+    U_f, S_f, V_ft = np.linalg.svd(F_matrix)
+    S_f[-1] = 0
+    F_matrix = U_f @ np.diag(S_f) @ V_ft
+
+    residual = 0.0
+    for i in range(n):
+        x  = np.array([points1[i, 0], points1[i, 1], 1.0])
+        x_ = np.array([points2[i, 0], points2[i, 1], 1.0])
+        val = x_.T @ F_matrix @ x
+        residual += val**2
 
     return F_matrix, residual
 
@@ -193,7 +208,7 @@ def ransac_fundamental_matrix(matches1, matches2, num_iters):
         sample_indices = np.random.choice(N, 8, replace=False)
         subset1 = matches1[sample_indices, :]
         subset2 = matches2[sample_indices, :]
-        F, _ = cv2.findFundamentalMat(subset1, subset2, cv2.FM_8POINT, 1e10, 0, 1)
+        F, _ = estimate_fundamental_matrix(subset1, subset2)
         if F is None or F.shape != (3, 3):
             continue
 
