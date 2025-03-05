@@ -147,6 +147,8 @@ def estimate_fundamental_matrix(points1, points2):
     :return F_matrix, the [3 x 3] fundamental matrix
             residual, the sum of the squared error in the estimation
     """
+    points1 = np.asarray(points1, dtype=float)
+    points2 = np.asarray(points2, dtype=float)
     n = points1.shape[0]
     u = points1[:, 0]
     v = points1[:, 1]
@@ -202,8 +204,8 @@ def ransac_fundamental_matrix(matches1, matches2, num_iters):
         sample_indices = np.random.choice(N, 8, replace=False)
         subset1 = matches1[sample_indices, :]
         subset2 = matches2[sample_indices, :]
-        #F, _ = estimate_fundamental_matrix(subset1, subset2)
-        F, _ = cv2.findFundamentalMat(subset1, subset2, cv2.FM_8POINT, 1e10, 0, 1)
+        F, _ = estimate_fundamental_matrix(subset1, subset2)
+        #F, _ = cv2.findFundamentalMat(subset1, subset2, cv2.FM_8POINT, 1e10, 0, 1)
         if F is None or F.shape != (3, 3):
             continue
 
