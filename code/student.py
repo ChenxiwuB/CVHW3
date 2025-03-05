@@ -178,28 +178,49 @@ def ransac_fundamental_matrix(matches1, matches2, num_iters):
     # DO NOT TOUCH THE FOLLOWING LINES
     random.seed(0)
     np.random.seed(0)
-    
-    ########################
-    # TODO: Your code here #
-    ########################
 
-    # Your RANSAC loop should contain a call to your 'estimate_fundamental_matrix()'
+    best_Fmatrix = None
+    best_inliers_a = None
+    best_inliers_b = None
+    best_inlier_count = 0
+    best_inlier_residual = np.inf
 
-    # Placeholder values
-    best_Fmatrix = estimate_fundamental_matrix(matches1[0:9, :], matches2[0:9, :])
-    best_inliers_a = matches1[0:29, :]
-    best_inliers_b = matches2[0:29, :]
-    best_inlier_residual = 5 # Arbitrary stencil code initial value placeholder.
+    #******Set a threshold*******
+    threshold = 0.0008
 
-    # For your report, we ask you to visualize RANSAC's 
-    # convergence over iterations. 
-    # For each iteration, append your inlier count and residual to the global variables:
-    #   inlier_counts = []
-    #   inlier_residuals = []
-    # Then add flag --visualize-ransac to plot these using visualize_ransac()
-    
+    N = matches1.shape[0]
+    for i in range(num_iters):
+        sample_indices = np.random.choice(N, 8, replace=False)
+        subset1 = matches1[sample_indices, :]
+        subset2 = matches2[sample_indices, :]
+        F, _ = cv2.findFundamentalMat(subset1, subset2, cv2.FM_8POINT, 1e10, 0, 1)
+        if F is None or F.shape != (3, 3):
+            continue
+
+        current_inlier_idx = []
+        current_residual = 0.0
+
+        for j in range(N):
+            pt1 = np.array([matches1[j, 0], matches1[j, 1], 1.0])
+            pt2 = np.array([matches2[j, 0], matches2[j, 1], 1.0])
+            error = abs(np.dot(pt2, np.dot(F, pt1)))
+            if error < threshold:
+                current_inlier_idx.append(j)
+                current_residual += error**2 
+
+        inlier_counts.append(len(current_inlier_idx))
+        inlier_residuals.append(current_residual)
+
+        if (len(current_inlier_idx) > best_inlier_count) or \
+           (len(current_inlier_idx) == best_inlier_count and current_residual < best_inlier_residual):
+            best_inlier_count = len(current_inlier_idx)
+            best_Fmatrix = F
+            best_inlier_residual = current_residual
+            best_inliers_a = matches1[current_inlier_idx, :]
+            best_inliers_b = matches2[current_inlier_idx, :]
 
     return best_Fmatrix, best_inliers_a, best_inliers_b, best_inlier_residual
+
 
 def matches_to_3d(points2d_1, points2d_2, M1, M2, threshold=1.0):
     """
