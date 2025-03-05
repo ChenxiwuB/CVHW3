@@ -248,20 +248,61 @@ def matches_to_3d(points2d_1, points2d_2, M1, M2, threshold=1.0):
     :return points2d_1_inlier: [M x 2] points as subset of inlier points from points2d_1
     :return points2d_2_inlier: [M x 2] points as subset of inlier points from points2d_2
     """
-    ########################
-    # TODO: Your code here #
+    
+    points2d_1 = np.asarray(points2d_1, dtype=float)
+    points2d_2 = np.asarray(points2d_2, dtype=float)
+    M1 = np.asarray(M1, dtype=float)
+    M2 = np.asarray(M2, dtype=float)
 
-    # Initial random values for 3D points
-    points3d_inlier = np.random.rand(len(points2d_1), 3)
-    points2d_1_inlier = np.array(points2d_1, copy=True) # only modify if using threshold
-    points2d_2_inlier = np.array(points2d_2, copy=True) # only modify if using threshold
+    points3d_list = []
+    inlier_idx = []
 
-    # Solve for ground truth points
+    N = len(points2d_1)
+    for i in range(N):
+        u1, v1 = points2d_1[i]
+        u2, v2 = points2d_2[i]
 
-    ########################
+        A = np.zeros((4, 3), dtype=float)
+        b = np.zeros((4,),    dtype=float)
+
+        A[0, :] = u1 * M1[2, 0:3] - M1[0, 0:3]
+        b[0]    = M1[0, 3] - u1 * M1[2, 3]
+
+        A[1, :] = v1 * M1[2, 0:3] - M1[1, 0:3]
+        b[1]    = M1[1, 3] - v1 * M1[2, 3]
+
+        A[2, :] = u2 * M2[2, 0:3] - M2[0, 0:3]
+        b[2]    = M2[0, 3] - u2 * M2[2, 3]
+
+        A[3, :] = v2 * M2[2, 0:3] - M2[1, 0:3]
+        b[3]    = M2[1, 3] - v2 * M2[2, 3]
+
+        X, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
+
+        homog_3d = np.append(X, 1.0)
+
+        proj_1 = M1 @ homog_3d 
+        px1 = proj_1[0] / proj_1[2]
+        py1 = proj_1[1] / proj_1[2]
+        # Reprojection error in image 1
+        err1 = np.sqrt((px1 - u1)**2 + (py1 - v1)**2)
+
+        proj_2 = M2 @ homog_3d
+        px2 = proj_2[0] / proj_2[2]
+        py2 = proj_2[1] / proj_2[2]
+        err2 = np.sqrt((px2 - u2)**2 + (py2 - v2)**2)
+
+        total_error = err1 + err2
+
+        if total_error < threshold:
+            points3d_list.append(X)
+            inlier_idx.append(i)
+
+    points3d_inlier = np.array(points3d_list, dtype=float)
+    points2d_1_inlier = points2d_1[inlier_idx, :]
+    points2d_2_inlier = points2d_2[inlier_idx, :]
 
     return points3d_inlier, points2d_1_inlier, points2d_2_inlier
-
 
 #/////////////////////////////DO NOT CHANGE BELOW LINE///////////////////////////////
 inlier_counts = []
