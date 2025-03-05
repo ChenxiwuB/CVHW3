@@ -147,28 +147,22 @@ def estimate_fundamental_matrix(points1, points2):
     :return F_matrix, the [3 x 3] fundamental matrix
             residual, the sum of the squared error in the estimation
     """
-
     n = points1.shape[0]
-    A = np.zeros((n, 9), dtype=float)
-    for i in range(n):
-        u,  v  = points1[i, 0], points1[i, 1]
-        up, vp = points2[i, 0], points2[i, 1]
-        A[i, :] = [up*u, up*v, up, vp*u, vp*v, vp, u, v, 1]
+    u = points1[:, 0]
+    v = points1[:, 1]
+    up = points2[:, 0]
+    vp = points2[:, 1]
+    A = np.column_stack((up*u, up*v, up, vp*u, vp*v, vp, u, v, np.ones(n)))
     U, S, Vt = np.linalg.svd(A)
     f = Vt[-1, :]
-
     F_matrix = f.reshape((3, 3))
-
     U_f, S_f, V_ft = np.linalg.svd(F_matrix)
     S_f[-1] = 0
     F_matrix = U_f @ np.diag(S_f) @ V_ft
-
-    residual = 0.0
-    for i in range(n):
-        x  = np.array([points1[i, 0], points1[i, 1], 1.0])
-        x_ = np.array([points2[i, 0], points2[i, 1], 1.0])
-        val = x_.T @ F_matrix @ x
-        residual += val**2
+    X  = np.hstack([points1, np.ones((n, 1))])
+    Xp = np.hstack([points2, np.ones((n, 1))])
+    vals = np.sum(Xp * (F_matrix @ X.T).T, axis=1)
+    residual = np.sum(vals**2)
 
     return F_matrix, residual
 
