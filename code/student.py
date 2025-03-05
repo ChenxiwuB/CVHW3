@@ -493,8 +493,8 @@ def estimate_fundamental_matrix(points1, points2):
     :return F_matrix, the [3 x 3] fundamental matrix
             residual, the sum of the squared error in the estimation
     """
-    points1 = np.asarray(points1, dtype=float)
-    points2 = np.asarray(points2, dtype=float)
+    #points1 = np.asarray(points1, dtype=float)
+    #points2 = np.asarray(points2, dtype=float)
     n = points1.shape[0]
     u = points1[:, 0]
     v = points1[:, 1]
