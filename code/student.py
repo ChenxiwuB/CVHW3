@@ -259,6 +259,12 @@ def matches_to_3d(points2d_1, points2d_2, M1, M2, threshold=1.0):
     :return points2d_2_inlier: [M x 2] points as subset of inlier points from points2d_2
     """
     threshold=2.0
+    
+    points2d_1 = np.asarray(points2d_1, dtype=float)
+    points2d_2 = np.asarray(points2d_2, dtype=float)
+
+    M1 = np.asarray(M1, dtype=float)
+    M2 = np.asarray(M2, dtype=float)
 
     points3d_list = []
     inlier_idx = []
