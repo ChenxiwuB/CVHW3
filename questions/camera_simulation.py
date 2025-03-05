@@ -35,13 +35,40 @@ Finally multiply the intrinsic and extrinsic matrices to obtain the camera matri
 :return: [3 x 4] NumPy array of the camera matrix, [3 x 3] NumPy array of the instrinsic matrix, [3 x 4] NumPy array of the extrinsic matrix
 """
 def calculate_camera_matrix(tx, ty, tz, alpha, beta, gamma, fx, fy, skew, u, v):
+
+    K = np.array([
+        [fx, skew, u],
+        [0,   fy,   v],
+        [0,    0,   1]
+    ])
     
-    ########################
-    # TODO: Your code here #
-    # Hint: Calculate the rotation matrices for the x, y, and z axes separately.
-    # Then multiply them to get the rotational part of the extrinsic matrix.
-    ########################
-    return initial_camera_matrix_to_replace, initial_intrinsic_matrix_to_replace, initial_extrinsic_matrix_to_replace
+    Rx = np.array([
+        [1, 0, 0],
+        [0, np.cos(alpha), -np.sin(alpha)],
+        [0, np.sin(alpha),  np.cos(alpha)]
+    ])
+    
+    Ry = np.array([
+        [ np.cos(beta), 0, np.sin(beta)],
+        [0,             1, 0],
+        [-np.sin(beta), 0, np.cos(beta)]
+    ])
+    
+    Rz = np.array([
+        [np.cos(gamma), -np.sin(gamma), 0],
+        [np.sin(gamma),  np.cos(gamma), 0],
+        [0,             0,              1]
+    ])
+    
+    R = Rz.dot(Ry).dot(Rx)
+
+    t = np.array([tx, ty, tz]).reshape(3, 1)
+    
+    extrinsic_matrix = np.hstack((R, t))
+    
+    camera_matrix = K.dot(extrinsic_matrix)
+    
+    return camera_matrix, K, extrinsic_matrix
 
 """
 This function calculates the coordinates given the student's calculated camera matrix.
