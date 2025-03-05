@@ -45,18 +45,54 @@ def calculate_projection_matrix(image, markers):
 
     points2d = np.array(points2d)
     points3d = np.array(points3d)
+    N = len(points2d)
 
-    ########################
-    # TODO: Your code here #
-    ########################
-    # # Placeholder values. This M matrix came from a call to rand(3,4). It leads to a high residual.
-    print('Randomly setting matrix entries as a placeholder')
-    M = np.array([[0.1768, 0.7018, 0.7948, 0.4613],
-                  [0.6750, 0.3152, 0.1136, 0.0480],
-                  [0.1020, 0.1725, 0.7244, 0.9932]])
-    residual = 7 # Arbitrary stencil code initial value placeholder
+    A = []
+    b = []
+    for i in range(N):
+        X, Y, Z = points3d[i]
+        u, v = points2d[i]
+        
+        A.append([
+            -X, -Y, -Z, -1,      
+             0,  0,  0,  0,      
+             u*X, u*Y, u*Z       
+        ])
+        b.append(-u)
+
+
+        A.append([
+             0,  0,  0,  0,      
+            -X, -Y, -Z, -1,      
+             v*X, v*Y, v*Z       
+        ])
+        b.append(-v)
+
+    A = np.array(A, dtype=np.float64) 
+    b = np.array(b, dtype=np.float64)
+  
+    x, residuals, rank, s = np.linalg.lstsq(A, b, rcond=None)
+
+    M = np.array([
+        [x[0],  x[1],  x[2],  x[3]],
+        [x[4],  x[5],  x[6],  x[7]],
+        [x[8],  x[9],  x[10], 1.0]
+    ], dtype=np.float64)
+
+    if residuals.size > 0:
+        residual = residuals[0]
+    else:
+        residual = 0.0
+        for i in range(N):
+            X, Y, Z = points3d[i]
+            u_true, v_true = points2d[i]
+            val = M @ np.array([X, Y, Z, 1], dtype=np.float64)
+            u_e = val[0] / val[2]
+            v_e = val[1] / val[2]
+            residual += (u_e - u_true)**2 + (v_e - v_true)**2
 
     return M, residual
+
 
 def normalize_coordinates(points):
     """
