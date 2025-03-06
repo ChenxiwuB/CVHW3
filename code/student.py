@@ -1,4 +1,3 @@
-
 import numpy as np
 import cv2
 import random
@@ -196,11 +195,11 @@ def ransac_fundamental_matrix(matches1, matches2, num_iters):
     best_inlier_residual = np.inf
 
     #******Set a threshold*******
-    threshold = 0.005
+    threshold = 0.05
 
     N = matches1.shape[0]
     for i in range(num_iters):
-        sample_indices = np.random.choice(N, 10, replace=False)
+        sample_indices = np.random.choice(N, 8, replace=False)
         subset1 = matches1[sample_indices, :]
         subset2 = matches2[sample_indices, :]
         #F, _ = cv2.findFundamentalMat(subset1, subset2, cv2.FM_8POINT, 1e10, 0, 1)

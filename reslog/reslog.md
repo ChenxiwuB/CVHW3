@@ -1,39 +1,20 @@
 # CSCI 1430 Results Log
 
-This log help us to grade your work; it is not a report or write up.
-- Be brief and precise.
-- Be anonymous.
+HW3 required items:
 
-For each homework:
-- Include the homework required items.
-- Report if you attempted extra credit, let us know where it is in your code, and show its results.
-- Any other information that you'd like us to have in grading, e.g., anything unusual or special, please let us know.
+A plot of one of RANSAC's F-matrix estimation performance over iterations.
 
-**Make sure** to commit all the required files to Github!
+In response this, here is a required image.
+![Required image result 1](iterations.png)
 
-## Required homework items
+An image of a 3D reconstruction of one of the sequences (cards, mikeandikes, or dollar).
 
-In response to question x, here's my text answer.
-
-In response to question x, here is a required image.
-![Required image result 1](placeholder.jpg)
-
-I could also provide a code snippet here, if I need to.
-```
-one = 1;
-two = one + one;
-if two == 2
-    disp( 'This computer is not broken.' );
-end
-```
+In response this, here is a required image.
+![Required image result 1](Recovered_3D_points.png)
 
 ## Extra credit?
 
-I attemped these extra credits:
-- One. In `thiscode.py`. The results were that xxxx. Here's an image:
-![Required image result 1](placeholder.jpg)
-
-- Two. In `thatcode.py`. The result was that yyyy. I even used some maths $xyz$.
+I didn't attempt extra credits.
 
 ## Anything else?
 
